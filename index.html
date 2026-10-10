@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Finanzas Personales</title>
+  <meta name="description" content="Gestor de finanzas personales: registra ingresos y gastos, controla presupuestos y visualiza tus datos.">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💶</text></svg>">
+  <link rel="stylesheet" href="src/styles.css">
+  <script>
+    try { const t = localStorage.getItem('finanzas:theme'); if (t) document.documentElement.dataset.theme = t; } catch {}
+  </script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true">💶</span>
+      <h1>Finanzas Personales</h1>
+    </div>
+    <div class="actions">
+      <button class="btn ghost" id="demo-btn" type="button">Cargar datos de ejemplo</button>
+      <button class="btn ghost" id="export-btn" type="button">Exportar CSV</button>
+      <label class="btn ghost" for="import-input">Importar CSV</label>
+      <input id="import-input" type="file" accept=".csv,text/csv" hidden>
+      <button class="btn icon" id="theme-btn" type="button" aria-label="Cambiar tema">🌓</button>
+    </div>
+  </header>
+
+  <main class="container">
+    <section class="cards" aria-label="Resumen">
+      <article class="card stat">
+        <h2>Balance</h2>
+        <p class="value" id="stat-balance">0,00 €</p>
+      </article>
+      <article class="card stat income">
+        <h2>Ingresos</h2>
+        <p class="value" id="stat-income">0,00 €</p>
+      </article>
+      <article class="card stat expense">
+        <h2>Gastos</h2>
+        <p class="value" id="stat-expense">0,00 €</p>
+      </article>
+      <article class="card stat">
+        <h2>Tasa de ahorro</h2>
+        <p class="value" id="stat-savings">—</p>
+      </article>
+    </section>
+
+    <div class="grid">
+      <section class="card" aria-labelledby="form-title">
+        <h2 id="form-title">Nueva transacción</h2>
+        <form id="tx-form" novalidate>
+          <div class="segmented" role="radiogroup" aria-label="Tipo">
+            <input type="radio" name="type" id="type-expense" value="expense" checked>
+            <label for="type-expense">Gasto</label>
+            <input type="radio" name="type" id="type-income" value="income">
+            <label for="type-income">Ingreso</label>
+          </div>
+          <label>Descripción
+            <input name="description" maxlength="80" placeholder="Ej. Supermercado" required>
+          </label>
+          <div class="row">
+            <label>Importe (€)
+              <input name="amount" inputmode="decimal" placeholder="0,00" required>
+            </label>
+            <label>Fecha
+              <input name="date" type="date" required>
+            </label>
+          </div>
+          <label>Categoría
+            <select name="category" required></select>
+          </label>
+          <ul class="errors" id="form-errors" role="alert"></ul>
+          <div class="row">
+            <button class="btn primary" type="submit" id="submit-btn">Añadir</button>
+            <button class="btn ghost" type="button" id="cancel-edit" hidden>Cancelar</button>
+          </div>
+        </form>
+      </section>
+
+      <section class="card" aria-labelledby="chart-cat-title">
+        <h2 id="chart-cat-title">Gastos por categoría</h2>
+        <div class="donut-wrap">
+          <canvas id="donut" role="img" aria-label="Gráfico de gastos por categoría"></canvas>
+          <ul class="legend" id="donut-legend"></ul>
+        </div>
+      </section>
+
+      <section class="card" aria-labelledby="chart-month-title">
+        <div class="card-head">
+          <h2 id="chart-month-title">Últimos 6 meses</h2>
+          <div class="legend inline">
+            <span><i style="background:#2bb673"></i>Ingresos</span>
+            <span><i style="background:#e5484d"></i>Gastos</span>
+          </div>
+        </div>
+        <canvas id="bars" role="img" aria-label="Gráfico de ingresos y gastos mensuales"></canvas>
+      </section>
+
+      <section class="card" aria-labelledby="budget-title">
+        <div class="card-head">
+          <h2 id="budget-title">Presupuestos del mes</h2>
+          <button class="btn ghost small" type="button" id="budget-toggle">Editar</button>
+        </div>
+        <form id="budget-form" hidden></form>
+        <ul class="budgets" id="budget-list"></ul>
+      </section>
+
+      <section class="card wide" aria-labelledby="list-title">
+        <div class="card-head">
+          <h2 id="list-title">Movimientos</h2>
+          <span class="muted" id="list-count"></span>
+        </div>
+        <div class="filters">
+          <input type="search" id="f-query" placeholder="Buscar…" aria-label="Buscar por descripción">
+          <select id="f-type" aria-label="Filtrar por tipo">
+            <option value="">Todos</option>
+            <option value="income">Ingresos</option>
+            <option value="expense">Gastos</option>
+          </select>
+          <select id="f-category" aria-label="Filtrar por categoría"><option value="">Todas las categorías</option></select>
+          <input type="month" id="f-month" aria-label="Filtrar por mes">
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Fecha</th><th>Descripción</th><th>Categoría</th><th class="num">Importe</th><th></th></tr>
+            </thead>
+            <tbody id="tx-body"></tbody>
+          </table>
+          <p class="empty" id="empty" hidden>No hay movimientos. Añade uno o carga los datos de ejemplo.</p>
+        </div>
+        <button class="btn ghost more" type="button" id="more-btn" hidden>Mostrar más</button>
+      </section>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <footer class="footer">
+    Hecho con HTML, CSS y JavaScript sin frameworks · Los datos se guardan solo en tu navegador
+  </footer>
+
+  <script type="module" src="src/app.js"></script>
+</body>
+</html>
