@@ -2,7 +2,7 @@
 
 Aplicación web para gestionar finanzas personales: registra ingresos y gastos, fija presupuestos mensuales por categoría y visualiza tus datos con gráficos. Está hecha con **HTML, CSS y JavaScript puro (ES Modules)**, sin frameworks ni dependencias.
 
-**🔗 Demo en vivo:** https://munguiagomezj.github.io/Proyecto1/ · pulsa *«Cargar datos de ejemplo»* para verla con datos.
+**🔗 Demo en vivo:** https://munguiagomezj.github.io/finanzas-personales/ · pulsa *«Cargar datos de ejemplo»* para verla con datos.
 
 ![Captura en modo claro](docs/captura-claro.png)
 
@@ -54,8 +54,8 @@ Decisiones técnicas:
 No hace falta instalar nada. Como usa ES Modules, hay que servirla por HTTP:
 
 ```bash
-git clone https://github.com/munguiagomezj/Proyecto1.git
-cd Proyecto1
+git clone https://github.com/munguiagomezj/finanzas-personales.git
+cd finanzas-personales
 npm start            # o: python3 -m http.server
 ```
 
